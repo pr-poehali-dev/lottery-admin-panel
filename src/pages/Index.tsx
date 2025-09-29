@@ -3,9 +3,46 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
 import { Badge } from '@/components/ui/badge';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { format } from 'date-fns';
+import { ru } from 'date-fns/locale';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('lotteries');
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [lotteryName, setLotteryName] = useState('');
+  const [lotteryDescription, setLotteryDescription] = useState('');
+  const [lotteryPrize, setLotteryPrize] = useState('');
+  const [lotteryConditions, setLotteryConditions] = useState('');
+  const [endDate, setEndDate] = useState<Date>();
+
+  const handleCreateLottery = () => {
+    console.log({
+      name: lotteryName,
+      description: lotteryDescription,
+      prize: lotteryPrize,
+      conditions: lotteryConditions,
+      endDate: endDate,
+    });
+    setIsDialogOpen(false);
+    setLotteryName('');
+    setLotteryDescription('');
+    setLotteryPrize('');
+    setLotteryConditions('');
+    setEndDate(undefined);
+  };
 
   const stats = [
     { label: 'Активных лотерей', value: '12', change: '+3', icon: 'Ticket' },
@@ -45,10 +82,117 @@ const Index = () => {
                 <p className="text-sm text-gray-500">Панель управления лотереями</p>
               </div>
             </div>
-            <Button className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white">
-              <Icon name="Plus" size={18} className="mr-2" />
-              Создать лотерею
-            </Button>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white">
+                  <Icon name="Plus" size={18} className="mr-2" />
+                  Создать лотерею
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-cyan-600 bg-clip-text text-transparent">
+                    Создание новой лотереи
+                  </DialogTitle>
+                  <DialogDescription>
+                    Заполните информацию о лотерее для её запуска
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-6 mt-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name" className="text-base font-semibold">
+                      Название лотереи
+                    </Label>
+                    <Input
+                      id="name"
+                      placeholder="Например: Новогодний розыгрыш 2026"
+                      value={lotteryName}
+                      onChange={(e) => setLotteryName(e.target.value)}
+                      className="h-12"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="description" className="text-base font-semibold">
+                      Описание
+                    </Label>
+                    <Textarea
+                      id="description"
+                      placeholder="Краткое описание лотереи и её целей"
+                      value={lotteryDescription}
+                      onChange={(e) => setLotteryDescription(e.target.value)}
+                      className="min-h-[100px] resize-none"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="prize" className="text-base font-semibold">
+                      Главный приз
+                    </Label>
+                    <Input
+                      id="prize"
+                      placeholder="Например: iPhone 15 Pro Max"
+                      value={lotteryPrize}
+                      onChange={(e) => setLotteryPrize(e.target.value)}
+                      className="h-12"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="conditions" className="text-base font-semibold">
+                      Условия участия
+                    </Label>
+                    <Textarea
+                      id="conditions"
+                      placeholder="Опишите условия и правила участия в лотерее"
+                      value={lotteryConditions}
+                      onChange={(e) => setLotteryConditions(e.target.value)}
+                      className="min-h-[100px] resize-none"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-base font-semibold">Дата окончания</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full h-12 justify-start text-left font-normal"
+                        >
+                          <Icon name="Calendar" size={18} className="mr-2" />
+                          {endDate ? format(endDate, 'PPP', { locale: ru }) : 'Выберите дату'}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={endDate}
+                          onSelect={setEndDate}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 mt-6">
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsDialogOpen(false)}
+                    className="flex-1 h-12"
+                  >
+                    Отмена
+                  </Button>
+                  <Button
+                    onClick={handleCreateLottery}
+                    className="flex-1 h-12 bg-gradient-to-r from-orange-500 to-cyan-500 hover:from-orange-600 hover:to-cyan-600 text-white"
+                  >
+                    <Icon name="Sparkles" size={18} className="mr-2" />
+                    Создать лотерею
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
       </header>
