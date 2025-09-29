@@ -18,6 +18,21 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('lotteries');
@@ -27,6 +42,27 @@ const Index = () => {
   const [lotteryPrize, setLotteryPrize] = useState('');
   const [lotteryConditions, setLotteryConditions] = useState('');
   const [endDate, setEndDate] = useState<Date>();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterStatus, setFilterStatus] = useState('all');
+
+  const participants = [
+    { id: 1, name: 'Алексей Иванов', email: 'alex@example.com', phone: '+7 (999) 123-45-67', tickets: 5, status: 'active', joinedDate: '15.09.2025' },
+    { id: 2, name: 'Мария Петрова', email: 'maria@example.com', phone: '+7 (999) 234-56-78', tickets: 3, status: 'active', joinedDate: '18.09.2025' },
+    { id: 3, name: 'Дмитрий Сидоров', email: 'dmitry@example.com', phone: '+7 (999) 345-67-89', tickets: 8, status: 'winner', joinedDate: '10.09.2025' },
+    { id: 4, name: 'Елена Смирнова', email: 'elena@example.com', phone: '+7 (999) 456-78-90', tickets: 2, status: 'active', joinedDate: '20.09.2025' },
+    { id: 5, name: 'Игорь Козлов', email: 'igor@example.com', phone: '+7 (999) 567-89-01', tickets: 6, status: 'active', joinedDate: '22.09.2025' },
+    { id: 6, name: 'Ольга Морозова', email: 'olga@example.com', phone: '+7 (999) 678-90-12', tickets: 4, status: 'winner', joinedDate: '12.09.2025' },
+    { id: 7, name: 'Сергей Волков', email: 'sergey@example.com', phone: '+7 (999) 789-01-23', tickets: 7, status: 'active', joinedDate: '25.09.2025' },
+    { id: 8, name: 'Анна Новикова', email: 'anna@example.com', phone: '+7 (999) 890-12-34', tickets: 1, status: 'inactive', joinedDate: '05.09.2025' },
+  ];
+
+  const filteredParticipants = participants.filter(participant => {
+    const matchesSearch = participant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         participant.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         participant.phone.includes(searchQuery);
+    const matchesStatus = filterStatus === 'all' || participant.status === filterStatus;
+    return matchesSearch && matchesStatus;
+  });
 
   const handleCreateLottery = () => {
     console.log({
@@ -222,6 +258,112 @@ const Index = () => {
             </Card>
           ))}
         </div>
+
+        {/* Participants Table */}
+        {activeTab === 'participants' && (
+          <Card className="p-6 border-0 bg-white/80 backdrop-blur-sm mb-8 animate-fade-in">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-lg flex items-center justify-center">
+                  <Icon name="Users" size={20} className="text-white" />
+                </div>
+                <h2 className="text-xl font-bold text-gray-900">Все участники</h2>
+              </div>
+              
+              <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
+                <div className="relative flex-1 md:w-64">
+                  <Icon name="Search" size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <Input
+                    placeholder="Поиск по имени, email или телефону"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10 h-10"
+                  />
+                </div>
+                <Select value={filterStatus} onValueChange={setFilterStatus}>
+                  <SelectTrigger className="w-full md:w-40 h-10">
+                    <SelectValue placeholder="Статус" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Все статусы</SelectItem>
+                    <SelectItem value="active">Активные</SelectItem>
+                    <SelectItem value="winner">Победители</SelectItem>
+                    <SelectItem value="inactive">Неактивные</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="border rounded-xl overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-gradient-to-r from-slate-50 to-gray-50 hover:from-slate-50 hover:to-gray-50">
+                    <TableHead className="font-bold text-gray-900">Имя</TableHead>
+                    <TableHead className="font-bold text-gray-900">Email</TableHead>
+                    <TableHead className="font-bold text-gray-900">Телефон</TableHead>
+                    <TableHead className="font-bold text-gray-900 text-center">Билетов</TableHead>
+                    <TableHead className="font-bold text-gray-900">Дата регистрации</TableHead>
+                    <TableHead className="font-bold text-gray-900">Статус</TableHead>
+                    <TableHead className="font-bold text-gray-900 text-right">Действия</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredParticipants.map((participant) => (
+                    <TableRow key={participant.id} className="hover:bg-gradient-to-r hover:from-orange-50 hover:to-cyan-50 transition-all">
+                      <TableCell className="font-medium">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-cyan-400 rounded-full flex items-center justify-center text-white font-semibold">
+                            {participant.name.split(' ').map(n => n[0]).join('')}
+                          </div>
+                          <span>{participant.name}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-gray-600">{participant.email}</TableCell>
+                      <TableCell className="text-gray-600">{participant.phone}</TableCell>
+                      <TableCell className="text-center">
+                        <Badge className="bg-yellow-100 text-yellow-700 hover:bg-yellow-100">
+                          {participant.tickets}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-gray-600">{participant.joinedDate}</TableCell>
+                      <TableCell>
+                        <Badge
+                          className={`${
+                            participant.status === 'active'
+                              ? 'bg-green-100 text-green-700 hover:bg-green-100'
+                              : participant.status === 'winner'
+                              ? 'bg-purple-100 text-purple-700 hover:bg-purple-100'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-100'
+                          }`}
+                        >
+                          {participant.status === 'active' ? 'Активен' : participant.status === 'winner' ? 'Победитель' : 'Неактивен'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end space-x-2">
+                          <Button variant="ghost" size="sm" className="hover:bg-cyan-50 hover:text-cyan-600">
+                            <Icon name="Eye" size={16} />
+                          </Button>
+                          <Button variant="ghost" size="sm" className="hover:bg-orange-50 hover:text-orange-600">
+                            <Icon name="Edit" size={16} />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+
+            {filteredParticipants.length === 0 && (
+              <div className="text-center py-12">
+                <Icon name="Users" size={48} className="mx-auto text-gray-300 mb-4" />
+                <p className="text-gray-500 text-lg">Участники не найдены</p>
+                <p className="text-gray-400 text-sm mt-2">Попробуйте изменить параметры поиска</p>
+              </div>
+            )}
+          </Card>
+        )}
 
         {/* Navigation Tabs */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
